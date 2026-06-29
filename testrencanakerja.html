@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Progress Rencana Kerja</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #f5f5f0; color: #222; }
+    header { background: #1a1a2e; color: white; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 18px; font-weight: 500; }
+    .teams { display: flex; gap: 8px; padding: 16px 24px; flex-wrap: wrap; }
+    .team-btn { padding: 8px 20px; border-radius: 20px; border: 1.5px solid #ccc; background: white; cursor: pointer; font-size: 14px; transition: all .15s; }
+    .team-btn.active { background: #1a1a2e; color: white; border-color: #1a1a2e; }
+    .container { padding: 0 24px 32px; }
+    .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .btn-add { background: #2563eb; color: white; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+    table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+    th { background: #f0f0ea; padding: 10px 14px; text-align: left; font-size: 13px; font-weight: 500; }
+    td { padding: 10px 14px; font-size: 13px; border-top: 1px solid #eee; }
+    .badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+    .badge.selesai { background: #dcfce7; color: #166534; }
+    .badge.progress { background: #dbeafe; color: #1e40af; }
+    .badge.belum { background: #f3f4f6; color: #374151; }
+    .badge.tunda { background: #fef3c7; color: #92400e; }
+    .progress-bar { background: #e5e7eb; border-radius: 4px; height: 8px; width: 100px; }
+    .progress-fill { background: #2563eb; height: 8px; border-radius: 4px; transition: width .3s; }
+    .btn-sm { padding: 4px 10px; border: none; border-radius: 5px; cursor: pointer; font-size: 12px; margin-right: 4px; }
+    .btn-edit { background: #e0f2fe; color: #0369a1; }
+    .btn-del { background: #fee2e2; color: #b91c1c; }
+    /* Modal */
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; align-items: center; justify-content: center; }
+    .overlay.open { display: flex; }
+    .modal { background: white; border-radius: 12px; padding: 24px; width: 100%; max-width: 440px; }
+    .modal h2 { font-size: 16px; font-weight: 500; margin-bottom: 16px; }
+    label { display: block; font-size: 13px; margin-bottom: 4px; color: #555; margin-top: 12px; }
+    input, select, textarea { width: 100%; border: 1px solid #ddd; border-radius: 7px; padding: 8px 10px; font-size: 14px; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+    .btn-cancel { padding: 8px 16px; border: 1.5px solid #ddd; background: white; border-radius: 7px; cursor: pointer; }
+    .btn-save { padding: 8px 18px; background: #2563eb; color: white; border: none; border-radius: 7px; cursor: pointer; }
+    .loading { text-align: center; padding: 40px; color: #888; }
+    .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .stat-card { background: white; border-radius: 10px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+    .stat-num { font-size: 28px; font-weight: 600; color: #2563eb; }
+    .stat-label { font-size: 12px; color: #888; margin-top: 2px; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>📋 Dashboard Rencana Kerja</h1>
+</header>
+
+<div class="teams" id="teamTabs"></div>
+
+<div class="container">
+  <div class="summary" id="summaryCards"></div>
+  <div class="toolbar">
+    <span id="tableTitle" style="font-weight:500;font-size:15px"></span>
+    <button class="btn-add" onclick="openModal()">+ Tambah Rencana</button>
+  </div>
+  <div id="tableWrap"><div class="loading">Pilih team di atas</div></div>
+</div>
+
+<!-- Modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2 id="modalTitle">Tambah Rencana Kerja</h2>
+    <input type="hidden" id="editRowIndex">
+    <label>Judul Rencana</label>
+    <input id="fJudul" placeholder="Nama rencana kerja">
+    <label>Deskripsi</label>
+    <textarea id="fDesc" rows="2" placeholder="Detail kegiatan"></textarea>
+    <label>PIC</label>
+    <input id="fPic" placeholder="Nama penanggung jawab">
+    <label>Status</label>
+    <select id="fStatus">
+      <option>Belum Mulai</option>
+      <option>On Progress</option>
+      <option>Selesai</option>
+      <option>Tunda</option>
+    </select>
+    <label>Progress (%)</label>
+    <input id="fProgress" type="number" min="0" max="100" value="0">
+    <label>Tanggal Target</label>
+    <input id="fTanggal" type="date">
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Batal</button>
+      <button class="btn-save" onclick="saveData()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_URL = "GANTI_DENGAN_URL_APPS_SCRIPT_KAMU";
+const TEAMS = ["WCA","FMA","DSA","OSD","MSD"];
+let currentTeam = null;
+let tableData = [];
+
+// Render team tabs
+const tabsEl = document.getElementById("teamTabs");
+TEAMS.forEach(t => {
+  const btn = document.createElement("button");
+  btn.className = "team-btn";
+  btn.textContent = t;
+  btn.onclick = () => loadTeam(t);
+  tabsEl.appendChild(btn);
+});
+
+async function loadTeam(team) {
+  currentTeam = team;
+  document.querySelectorAll(".team-btn").forEach(b => b.classList.toggle("active", b.textContent === team));
+  document.getElementById("tableTitle").textContent = `Team ${team}`;
+  document.getElementById("tableWrap").innerHTML = '<div class="loading">Memuat data...</div>';
+
+  try {
+    const res = await fetch(`${API_URL}?team=${team}`);
+    tableData = await res.json();
+    renderTable(tableData);
+    renderSummary(tableData);
+  } catch(e) {
+    document.getElementById("tableWrap").innerHTML = '<div class="loading">Gagal memuat. Cek URL API.</div>';
+  }
+}
+
+function renderTable(data) {
+  if (!data.length) {
+    document.getElementById("tableWrap").innerHTML = '<div class="loading">Belum ada data. Tambahkan rencana kerja.</div>';
+    return;
+  }
+  const rows = data.map(r => `
+    <tr>
+      <td>${r["Judul Rencana"] || "-"}</td>
+      <td>${r["PIC"] || "-"}</td>
+      <td><span class="badge ${badgeClass(r["Status"])}">${r["Status"] || "-"}</span></td>
+      <td>
+        <div class="progress-bar"><div class="progress-fill" style="width:${r["Progress (%)"] || 0}%"></div></div>
+        <span style="font-size:11px;color:#888">${r["Progress (%)"] || 0}%</span>
+      </td>
+      <td>${r["Tanggal Target"] || "-"}</td>
+      <td>
+        <button class="btn-sm btn-edit" onclick='editRow(${r.rowIndex}, ${JSON.stringify(r)})'>Edit</button>
+        <button class="btn-sm btn-del" onclick="deleteRow(${r.rowIndex})">Hapus</button>
+      </td>
+    </tr>`).join("");
+
+  document.getElementById("tableWrap").innerHTML = `
+    <table>
+      <thead><tr><th>Judul</th><th>PIC</th><th>Status</th><th>Progress</th><th>Target</th><th>Aksi</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+function renderSummary(data) {
+  const total = data.length;
+  const selesai = data.filter(r => r["Status"] === "Selesai").length;
+  const progress = data.filter(r => r["Status"] === "On Progress").length;
+  const avgProg = total ? Math.round(data.reduce((s, r) => s + (Number(r["Progress (%)"]) || 0), 0) / total) : 0;
+
+  document.getElementById("summaryCards").innerHTML = `
+    <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Total Rencana</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:#166534">${selesai}</div><div class="stat-label">Selesai</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:#1e40af">${progress}</div><div class="stat-label">On Progress</div></div>
+    <div class="stat-card"><div class="stat-num">${avgProg}%</div><div class="stat-label">Rata-rata Progress</div></div>`;
+}
+
+function badgeClass(s) {
+  if (!s) return "belum";
+  if (s === "Selesai") return "selesai";
+  if (s === "On Progress") return "progress";
+  if (s === "Tunda") return "tunda";
+  return "belum";
+}
+
+function openModal(isEdit = false) {
+  document.getElementById("modalTitle").textContent = isEdit ? "Edit Rencana Kerja" : "Tambah Rencana Kerja";
+  document.getElementById("overlay").classList.add("open");
+}
+function closeModal() {
+  document.getElementById("overlay").classList.remove("open");
+  ["fJudul","fDesc","fPic","fProgress","fTanggal","editRowIndex"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("fStatus").value = "Belum Mulai";
+  document.getElementById("fProgress").value = 0;
+}
+
+function editRow(rowIndex, row) {
+  document.getElementById("editRowIndex").value = rowIndex;
+  document.getElementById("fJudul").value = row["Judul Rencana"] || "";
+  document.getElementById("fDesc").value = row["Deskripsi"] || "";
+  document.getElementById("fPic").value = row["PIC"] || "";
+  document.getElementById("fStatus").value = row["Status"] || "Belum Mulai";
+  document.getElementById("fProgress").value = row["Progress (%)"] || 0;
+  document.getElementById("fTanggal").value = row["Tanggal Target"] || "";
+  openModal(true);
+}
+
+async function saveData() {
+  const rowIndex = document.getElementById("editRowIndex").value;
+  const isEdit = !!rowIndex;
+  const payload = {
+    team: currentTeam,
+    action: isEdit ? "update" : "create",
+    data: {
+      judul: document.getElementById("fJudul").value,
+      deskripsi: document.getElementById("fDesc").value,
+      pic: document.getElementById("fPic").value,
+      status: document.getElementById("fStatus").value,
+      progress: document.getElementById("fProgress").value,
+      tanggal: document.getElementById("fTanggal").value,
+    }
+  };
+  if (isEdit) payload.rowIndex = Number(rowIndex);
+
+  await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+  closeModal();
+  loadTeam(currentTeam);
+}
+
+async function deleteRow(rowIndex) {
+  if (!confirm("Hapus rencana ini?")) return;
+  await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ team: currentTeam, action: "delete", rowIndex })
+  });
+  loadTeam(currentTeam);
+}
+</script>
+</body>
+</html>
