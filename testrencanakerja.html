@@ -1,228 +1,879 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Progress Rencana Kerja</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, sans-serif; background: #f5f5f0; color: #222; }
-    header { background: #1a1a2e; color: white; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
-    header h1 { font-size: 18px; font-weight: 500; }
-    .teams { display: flex; gap: 8px; padding: 16px 24px; flex-wrap: wrap; }
-    .team-btn { padding: 8px 20px; border-radius: 20px; border: 1.5px solid #ccc; background: white; cursor: pointer; font-size: 14px; transition: all .15s; }
-    .team-btn.active { background: #1a1a2e; color: white; border-color: #1a1a2e; }
-    .container { padding: 0 24px 32px; }
-    .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .btn-add { background: #2563eb; color: white; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; }
-    table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
-    th { background: #f0f0ea; padding: 10px 14px; text-align: left; font-size: 13px; font-weight: 500; }
-    td { padding: 10px 14px; font-size: 13px; border-top: 1px solid #eee; }
-    .badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
-    .badge.selesai { background: #dcfce7; color: #166534; }
-    .badge.progress { background: #dbeafe; color: #1e40af; }
-    .badge.belum { background: #f3f4f6; color: #374151; }
-    .badge.tunda { background: #fef3c7; color: #92400e; }
-    .progress-bar { background: #e5e7eb; border-radius: 4px; height: 8px; width: 100px; }
-    .progress-fill { background: #2563eb; height: 8px; border-radius: 4px; transition: width .3s; }
-    .btn-sm { padding: 4px 10px; border: none; border-radius: 5px; cursor: pointer; font-size: 12px; margin-right: 4px; }
-    .btn-edit { background: #e0f2fe; color: #0369a1; }
-    .btn-del { background: #fee2e2; color: #b91c1c; }
-    /* Modal */
-    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; align-items: center; justify-content: center; }
-    .overlay.open { display: flex; }
-    .modal { background: white; border-radius: 12px; padding: 24px; width: 100%; max-width: 440px; }
-    .modal h2 { font-size: 16px; font-weight: 500; margin-bottom: 16px; }
-    label { display: block; font-size: 13px; margin-bottom: 4px; color: #555; margin-top: 12px; }
-    input, select, textarea { width: 100%; border: 1px solid #ddd; border-radius: 7px; padding: 8px 10px; font-size: 14px; }
-    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
-    .btn-cancel { padding: 8px 16px; border: 1.5px solid #ddd; background: white; border-radius: 7px; cursor: pointer; }
-    .btn-save { padding: 8px 18px; background: #2563eb; color: white; border: none; border-radius: 7px; cursor: pointer; }
-    .loading { text-align: center; padding: 40px; color: #888; }
-    .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
-    .stat-card { background: white; border-radius: 10px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
-    .stat-num { font-size: 28px; font-weight: 600; color: #2563eb; }
-    .stat-label { font-size: 12px; color: #888; margin-top: 2px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Rencana Kerja Tim</title>
+<style>
+  /* ── Reset & Base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:    #0f172a;
+    --navy2:   #1e293b;
+    --blue:    #2563eb;
+    --blue-lt: #eff6ff;
+    --blue-bd: #bfdbfe;
+    --green:   #16a34a;
+    --green-lt:#f0fdf4;
+    --amber:   #d97706;
+    --amber-lt:#fffbeb;
+    --red:     #dc2626;
+    --red-lt:  #fef2f2;
+    --gray:    #6b7280;
+    --gray-lt: #f9fafb;
+    --border:  #e5e7eb;
+    --text:    #111827;
+    --text2:   #6b7280;
+    --radius:  8px;
+    --shadow:  0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: #f1f5f9;
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── Sidebar ── */
+  .layout { display: flex; min-height: 100vh; }
+
+  .sidebar {
+    width: 220px;
+    background: var(--navy);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+
+  .sidebar-logo {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .sidebar-logo .logo-mark {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    color: #94a3b8;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .sidebar-logo h1 {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: #f8fafc;
+  }
+
+  .sidebar-nav { padding: 16px 12px; flex: 1; }
+  .sidebar-nav .nav-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    color: #64748b;
+    text-transform: uppercase;
+    padding: 0 8px;
+    margin-bottom: 8px;
+  }
+
+  .team-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 9px 12px;
+    border: none;
+    background: transparent;
+    color: #cbd5e1;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: left;
+    transition: background .15s, color .15s;
+    margin-bottom: 2px;
+  }
+  .team-btn:hover { background: rgba(255,255,255,.06); color: #f8fafc; }
+  .team-btn.active { background: var(--blue); color: #fff; }
+
+  .team-badge {
+    margin-left: auto;
+    background: rgba(255,255,255,.15);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 10px;
+    min-width: 22px;
+    text-align: center;
+  }
+  .team-btn.active .team-badge { background: rgba(255,255,255,.25); }
+
+  .sidebar-footer {
+    padding: 16px 20px;
+    border-top: 1px solid rgba(255,255,255,.08);
+    font-size: 11px;
+    color: #475569;
+  }
+
+  /* ── Main ── */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* ── Topbar ── */
+  .topbar {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .topbar-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+
+  .search-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--gray-lt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 7px 12px;
+  }
+  .search-box svg { color: var(--gray); flex-shrink: 0; }
+  .search-box input {
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    width: 200px;
+  }
+  .search-box input::placeholder { color: var(--text2); }
+
+  .filter-select {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 7px 10px;
+    font-size: 13px;
+    color: var(--text);
+    background: #fff;
+    cursor: pointer;
+    outline: none;
+  }
+
+  .btn-add {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .btn-add:hover { background: #1d4ed8; }
+
+  /* ── Content ── */
+  .content { padding: 24px 28px; overflow-y: auto; flex: 1; }
+
+  /* ── Summary Cards ── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .stat-card .stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--text2);
+    margin-bottom: 8px;
+  }
+  .stat-card .stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-card .stat-sub { font-size: 12px; color: var(--text2); }
+  .stat-value.blue  { color: var(--blue); }
+  .stat-value.green { color: var(--green); }
+  .stat-value.amber { color: var(--amber); }
+  .stat-value.red   { color: var(--red); }
+
+  /* ── Table Card ── */
+  .table-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .table-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .table-header h2 { font-size: 14px; font-weight: 600; }
+  .table-header .count { font-size: 12px; color: var(--text2); }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    padding: 10px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--text2);
+    background: var(--gray-lt);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #f8fafc; }
+  td { padding: 12px 16px; font-size: 13px; vertical-align: top; }
+
+  .td-id { color: var(--text2); font-size: 12px; font-weight: 500; width: 44px; }
+  .td-task { max-width: 320px; }
+  .td-task .task-text { font-weight: 500; line-height: 1.4; margin-bottom: 4px; }
+  .td-task .task-notes {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.5;
+    background: #f8fafc;
+    border-left: 2px solid var(--blue-bd);
+    padding: 4px 8px;
+    border-radius: 0 4px 4px 0;
+    margin-top: 4px;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .td-ts { font-size: 12px; color: var(--text2); white-space: nowrap; }
+
+  /* Status badges */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .badge-todo    { background: #f3f4f6; color: #374151; }
+  .badge-todo::before { background: #9ca3af; }
+  .badge-inprogress { background: var(--blue-lt); color: #1e40af; }
+  .badge-inprogress::before { background: var(--blue); }
+  .badge-done    { background: var(--green-lt); color: #166534; }
+  .badge-done::before { background: var(--green); }
+  .badge-hold    { background: var(--amber-lt); color: #92400e; }
+  .badge-hold::before { background: var(--amber); }
+  .badge-cancelled { background: var(--red-lt); color: #991b1b; }
+  .badge-cancelled::before { background: var(--red); }
+
+  /* Action buttons */
+  .actions { display: flex; gap: 6px; white-space: nowrap; }
+  .btn-icon {
+    border: 1px solid var(--border);
+    background: #fff;
+    border-radius: 6px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text2);
+    transition: all .15s;
+  }
+  .btn-icon:hover { background: var(--gray-lt); color: var(--text); }
+  .btn-icon.danger:hover { background: var(--red-lt); color: var(--red); border-color: #fca5a5; }
+
+  /* ── Empty / Loading states ── */
+  .state-box {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--text2);
+  }
+  .state-box svg { margin: 0 auto 12px; display: block; opacity: .3; }
+  .state-box p { font-size: 14px; }
+  .state-box small { font-size: 12px; opacity: .7; }
+
+  /* ── Spinner ── */
+  .spinner {
+    width: 28px; height: 28px;
+    border: 3px solid var(--border);
+    border-top-color: var(--blue);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Modal ── */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,.45);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .overlay.open { display: flex; }
+
+  .modal {
+    background: #fff;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    overflow: hidden;
+  }
+  .modal-head {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .modal-head h2 { font-size: 15px; font-weight: 600; }
+  .modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text2);
+    padding: 4px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-close:hover { background: var(--gray-lt); color: var(--text); }
+
+  .modal-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; }
+
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group label { font-size: 12px; font-weight: 600; color: var(--text2); }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 9px 12px;
+    font-size: 13px;
+    color: var(--text);
+    background: #fff;
+    outline: none;
+    font-family: inherit;
+    transition: border-color .15s;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+  .form-group textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+
+  .modal-foot {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  .btn-cancel {
+    padding: 8px 18px;
+    border: 1px solid var(--border);
+    background: #fff;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text);
+    transition: background .15s;
+  }
+  .btn-cancel:hover { background: var(--gray-lt); }
+  .btn-save {
+    padding: 8px 20px;
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .btn-save:hover { background: #1d4ed8; }
+  .btn-save:disabled { background: #93c5fd; cursor: not-allowed; }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--navy);
+    color: #fff;
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity .25s, transform .25s;
+    z-index: 999;
+    pointer-events: none;
+  }
+  #toast.show { opacity: 1; transform: translateY(0); }
+  #toast.success { background: #15803d; }
+  #toast.error   { background: var(--red); }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .summary-grid { grid-template-columns: repeat(2, 1fr); }
+    .search-box input { width: 130px; }
+  }
+</style>
 </head>
 <body>
-<header>
-  <h1>📋 Dashboard Rencana Kerja</h1>
-</header>
 
-<div class="teams" id="teamTabs"></div>
+<div class="layout">
 
-<div class="container">
-  <div class="summary" id="summaryCards"></div>
-  <div class="toolbar">
-    <span id="tableTitle" style="font-weight:500;font-size:15px"></span>
-    <button class="btn-add" onclick="openModal()">+ Tambah Rencana</button>
-  </div>
-  <div id="tableWrap"><div class="loading">Pilih team di atas</div></div>
-</div>
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">Dashboard</div>
+      <h1>Rencana Kerja Tim</h1>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Teams</div>
+      <div id="sidebarTeams"></div>
+    </nav>
+    <div class="sidebar-footer">
+      Terakhir refresh: <span id="lastRefresh">—</span>
+    </div>
+  </aside>
 
-<!-- Modal -->
-<div class="overlay" id="overlay">
-  <div class="modal">
-    <h2 id="modalTitle">Tambah Rencana Kerja</h2>
-    <input type="hidden" id="editRowIndex">
-    <label>Judul Rencana</label>
-    <input id="fJudul" placeholder="Nama rencana kerja">
-    <label>Deskripsi</label>
-    <textarea id="fDesc" rows="2" placeholder="Detail kegiatan"></textarea>
-    <label>PIC</label>
-    <input id="fPic" placeholder="Nama penanggung jawab">
-    <label>Status</label>
-    <select id="fStatus">
-      <option>Belum Mulai</option>
-      <option>On Progress</option>
-      <option>Selesai</option>
-      <option>Tunda</option>
-    </select>
-    <label>Progress (%)</label>
-    <input id="fProgress" type="number" min="0" max="100" value="0">
-    <label>Tanggal Target</label>
-    <input id="fTanggal" type="date">
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal()">Batal</button>
-      <button class="btn-save" onclick="saveData()">Simpan</button>
+  <!-- ── Main ── -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-title" id="topbarTitle">Pilih team di sidebar</div>
+      <div class="topbar-right">
+        <div class="search-box">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+          </svg>
+          <input type="text" id="searchInput" placeholder="Cari task..." oninput="filterTable()">
+        </div>
+        <select class="filter-select" id="statusFilter" onchange="filterTable()">
+          <option value="">Semua Status</option>
+          <option value="To Do">To Do</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Done">Done</option>
+          <option value="On Hold">On Hold</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+        <button class="btn-add" onclick="openModal()" id="btnAdd" disabled>
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          Tambah Task
+        </button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- Summary cards -->
+      <div class="summary-grid" id="summaryGrid">
+        <div class="stat-card"><div class="stat-label">Total Task</div><div class="stat-value blue" id="sTotal">—</div><div class="stat-sub">semua status</div></div>
+        <div class="stat-card"><div class="stat-label">Selesai</div><div class="stat-value green" id="sDone">—</div><div class="stat-sub">Done</div></div>
+        <div class="stat-card"><div class="stat-label">Berjalan</div><div class="stat-value amber" id="sProgress">—</div><div class="stat-sub">In Progress</div></div>
+        <div class="stat-card"><div class="stat-label">Belum Mulai</div><div class="stat-value" id="sTodo" style="color:var(--gray)">—</div><div class="stat-sub">To Do</div></div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-card">
+        <div class="table-header">
+          <h2 id="tableHeading">—</h2>
+          <span class="count" id="tableCount"></span>
+        </div>
+        <div id="tableWrap">
+          <div class="state-box">
+            <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
+              <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+              <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+            </svg>
+            <p>Pilih team dari sidebar untuk melihat data</p>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
 
-<script>
-const API_URL = AKfycbwTzekXviZKcHjHjDXKqi0skdwwIWPgeub2RFVHgJL-L1j7uh67IDu8eZlGQJl5H31Y;
-const TEAMS = ["WCA","FMA","DSA","OSD","MSD"];
-let currentTeam = null;
-let tableData = [];
+<!-- ── Modal Tambah / Edit ── -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="modalTitle">Tambah Task Baru</h2>
+      <button class="modal-close" onclick="closeModal()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editRowIndex">
+      <div class="form-group">
+        <label>Nama Task <span style="color:var(--red)">*</span></label>
+        <textarea id="fTask" placeholder="Deskripsi singkat task / kegiatan..." rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="fStatus">
+          <option value="To Do">To Do</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Done">Done</option>
+          <option value="On Hold">On Hold</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Catatan / Notes</label>
+        <textarea id="fNotes" placeholder="Tambahkan catatan, update terkini, kendala, atau informasi lain yang perlu dicatat..." rows="4"></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeModal()">Batal</button>
+      <button class="btn-save" id="btnSave" onclick="saveData()">Simpan</button>
+    </div>
+  </div>
+</div>
 
-// Render team tabs
-const tabsEl = document.getElementById("teamTabs");
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+// ──────────────────────────────────────────────
+//  GANTI nilai ini dengan URL deployment Apps Script kamu
+// ──────────────────────────────────────────────
+const API_URL = AKfycbwTzekXviZKcHjHjDXKqi0skdwwIWPgeub2RFVHgJL-L1j7uh67IDu8eZlGQJl5H31Y;
+
+const TEAMS = ["WCA", "FMA", "DSA", "OSD", "MSD"];
+let currentTeam = null;
+let allData = [];        // raw data dari API untuk team aktif
+let filteredData = [];   // setelah search + filter
+
+// ── Init sidebar ──
+const sidebarEl = document.getElementById("sidebarTeams");
 TEAMS.forEach(t => {
   const btn = document.createElement("button");
   btn.className = "team-btn";
-  btn.textContent = t;
+  btn.dataset.team = t;
+  btn.innerHTML = `
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+      <circle cx="9" cy="7" r="4"/>
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+    </svg>
+    ${t}
+    <span class="team-badge" id="badge-${t}">—</span>`;
   btn.onclick = () => loadTeam(t);
-  tabsEl.appendChild(btn);
+  sidebarEl.appendChild(btn);
 });
 
+// Preload semua badge count
+async function loadAllCounts() {
+  try {
+    const res = await fetch(API_URL);
+    const data = await res.json();
+    TEAMS.forEach(t => {
+      const el = document.getElementById(`badge-${t}`);
+      if (el && data[t]) el.textContent = data[t].length;
+    });
+  } catch (_) {}
+}
+loadAllCounts();
+
+// ── Load data satu team ──
 async function loadTeam(team) {
   currentTeam = team;
-  document.querySelectorAll(".team-btn").forEach(b => b.classList.toggle("active", b.textContent === team));
-  document.getElementById("tableTitle").textContent = `Team ${team}`;
-  document.getElementById("tableWrap").innerHTML = '<div class="loading">Memuat data...</div>';
+  document.getElementById("btnAdd").disabled = false;
+
+  document.querySelectorAll(".team-btn").forEach(b =>
+    b.classList.toggle("active", b.dataset.team === team));
+  document.getElementById("topbarTitle").textContent = `Team ${team}`;
+  document.getElementById("tableHeading").textContent = `Daftar Task — ${team}`;
+  document.getElementById("tableCount").textContent = "";
+
+  setLoading();
 
   try {
     const res = await fetch(`${API_URL}?team=${team}`);
-    tableData = await res.json();
-    renderTable(tableData);
-    renderSummary(tableData);
-  } catch(e) {
-    document.getElementById("tableWrap").innerHTML = '<div class="loading">Gagal memuat. Cek URL API.</div>';
+    allData = await res.json();
+    if (!Array.isArray(allData)) throw new Error("Respons tidak valid");
+    updateSummary(allData);
+    filterTable();
+    const ts = new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+    document.getElementById("lastRefresh").textContent = ts;
+    // update badge sidebar
+    const badgeEl = document.getElementById(`badge-${team}`);
+    if (badgeEl) badgeEl.textContent = allData.length;
+  } catch (e) {
+    document.getElementById("tableWrap").innerHTML = `
+      <div class="state-box">
+        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>
+        </svg>
+        <p>Gagal memuat data</p>
+        <small>Pastikan API_URL sudah diisi dan Apps Script sudah di-deploy</small>
+      </div>`;
   }
 }
 
+function setLoading() {
+  document.getElementById("tableWrap").innerHTML = `
+    <div class="state-box"><div class="spinner"></div><p>Memuat data...</p></div>`;
+}
+
+// ── Filter (search + status) ──
+function filterTable() {
+  const q = document.getElementById("searchInput").value.toLowerCase();
+  const s = document.getElementById("statusFilter").value;
+  filteredData = allData.filter(r => {
+    const taskText = (r["Task"] || "").toLowerCase();
+    const notesText = (r["Notes"] || "").toLowerCase();
+    const matchQ = !q || taskText.includes(q) || notesText.includes(q);
+    const matchS = !s || r["Status"] === s;
+    return matchQ && matchS;
+  });
+  renderTable(filteredData);
+  document.getElementById("tableCount").textContent =
+    filteredData.length !== allData.length
+      ? `Menampilkan ${filteredData.length} dari ${allData.length} task`
+      : `${allData.length} task`;
+}
+
+// ── Render table ──
 function renderTable(data) {
   if (!data.length) {
-    document.getElementById("tableWrap").innerHTML = '<div class="loading">Belum ada data. Tambahkan rencana kerja.</div>';
+    document.getElementById("tableWrap").innerHTML = `
+      <div class="state-box">
+        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
+          <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+          <rect x="9" y="3" width="6" height="4" rx="1"/>
+        </svg>
+        <p>Belum ada task</p>
+        <small>Klik "Tambah Task" untuk menambahkan rencana kerja baru</small>
+      </div>`;
     return;
   }
-  const rows = data.map(r => `
-    <tr>
-      <td>${r["Judul Rencana"] || "-"}</td>
-      <td>${r["PIC"] || "-"}</td>
-      <td><span class="badge ${badgeClass(r["Status"])}">${r["Status"] || "-"}</span></td>
-      <td>
-        <div class="progress-bar"><div class="progress-fill" style="width:${r["Progress (%)"] || 0}%"></div></div>
-        <span style="font-size:11px;color:#888">${r["Progress (%)"] || 0}%</span>
-      </td>
-      <td>${r["Tanggal Target"] || "-"}</td>
-      <td>
-        <button class="btn-sm btn-edit" onclick='editRow(${r.rowIndex}, ${JSON.stringify(r)})'>Edit</button>
-        <button class="btn-sm btn-del" onclick="deleteRow(${r.rowIndex})">Hapus</button>
-      </td>
-    </tr>`).join("");
+
+  const rows = data.map(r => {
+    const notes = r["Notes"] ? `<div class="task-notes">${escHtml(r["Notes"])}</div>` : "";
+    return `
+      <tr>
+        <td class="td-id">#${r["ID"]}</td>
+        <td class="td-task">
+          <div class="task-text">${escHtml(r["Task"] || "—")}</div>
+          ${notes}
+        </td>
+        <td>${statusBadge(r["Status"])}</td>
+        <td class="td-ts">${r["Timestamp"] || "—"}</td>
+        <td>
+          <div class="actions">
+            <button class="btn-icon" title="Edit" onclick='editRow(${r.rowIndex}, ${JSON.stringify(r).replace(/'/g, "&#39;")})'>
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </button>
+            <button class="btn-icon danger" title="Hapus" onclick="deleteRow(${r.rowIndex})">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
+                <path d="M10 11v6M14 11v6M9 6V4h6v2"/>
+              </svg>
+            </button>
+          </div>
+        </td>
+      </tr>`;
+  }).join("");
 
   document.getElementById("tableWrap").innerHTML = `
     <table>
-      <thead><tr><th>Judul</th><th>PIC</th><th>Status</th><th>Progress</th><th>Target</th><th>Aksi</th></tr></thead>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Task / Kegiatan</th>
+          <th>Status</th>
+          <th>Timestamp</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
       <tbody>${rows}</tbody>
     </table>`;
 }
 
-function renderSummary(data) {
+// ── Summary cards ──
+function updateSummary(data) {
   const total = data.length;
-  const selesai = data.filter(r => r["Status"] === "Selesai").length;
-  const progress = data.filter(r => r["Status"] === "On Progress").length;
-  const avgProg = total ? Math.round(data.reduce((s, r) => s + (Number(r["Progress (%)"]) || 0), 0) / total) : 0;
-
-  document.getElementById("summaryCards").innerHTML = `
-    <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Total Rencana</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:#166534">${selesai}</div><div class="stat-label">Selesai</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:#1e40af">${progress}</div><div class="stat-label">On Progress</div></div>
-    <div class="stat-card"><div class="stat-num">${avgProg}%</div><div class="stat-label">Rata-rata Progress</div></div>`;
+  const done  = data.filter(r => r["Status"] === "Done").length;
+  const prog  = data.filter(r => r["Status"] === "In Progress").length;
+  const todo  = data.filter(r => r["Status"] === "To Do").length;
+  document.getElementById("sTotal").textContent   = total;
+  document.getElementById("sDone").textContent    = done;
+  document.getElementById("sProgress").textContent = prog;
+  document.getElementById("sTodo").textContent    = todo;
 }
 
-function badgeClass(s) {
-  if (!s) return "belum";
-  if (s === "Selesai") return "selesai";
-  if (s === "On Progress") return "progress";
-  if (s === "Tunda") return "tunda";
-  return "belum";
+// ── Status badge ──
+function statusBadge(s) {
+  const map = {
+    "To Do":       "badge-todo",
+    "In Progress": "badge-inprogress",
+    "Done":        "badge-done",
+    "On Hold":     "badge-hold",
+    "Cancelled":   "badge-cancelled",
+  };
+  const cls = map[s] || "badge-todo";
+  return `<span class="badge ${cls}">${escHtml(s || "To Do")}</span>`;
 }
 
+// ── Modal ──
 function openModal(isEdit = false) {
-  document.getElementById("modalTitle").textContent = isEdit ? "Edit Rencana Kerja" : "Tambah Rencana Kerja";
+  document.getElementById("modalTitle").textContent = isEdit ? "Edit Task" : "Tambah Task Baru";
   document.getElementById("overlay").classList.add("open");
 }
 function closeModal() {
   document.getElementById("overlay").classList.remove("open");
-  ["fJudul","fDesc","fPic","fProgress","fTanggal","editRowIndex"].forEach(id => document.getElementById(id).value = "");
-  document.getElementById("fStatus").value = "Belum Mulai";
-  document.getElementById("fProgress").value = 0;
+  document.getElementById("fTask").value = "";
+  document.getElementById("fStatus").value = "To Do";
+  document.getElementById("fNotes").value = "";
+  document.getElementById("editRowIndex").value = "";
 }
 
 function editRow(rowIndex, row) {
   document.getElementById("editRowIndex").value = rowIndex;
-  document.getElementById("fJudul").value = row["Judul Rencana"] || "";
-  document.getElementById("fDesc").value = row["Deskripsi"] || "";
-  document.getElementById("fPic").value = row["PIC"] || "";
-  document.getElementById("fStatus").value = row["Status"] || "Belum Mulai";
-  document.getElementById("fProgress").value = row["Progress (%)"] || 0;
-  document.getElementById("fTanggal").value = row["Tanggal Target"] || "";
+  document.getElementById("fTask").value   = row["Task"]   || "";
+  document.getElementById("fStatus").value = row["Status"] || "To Do";
+  document.getElementById("fNotes").value  = row["Notes"]  || "";
   openModal(true);
 }
 
+// ── Save (create / update) ──
 async function saveData() {
+  const task = document.getElementById("fTask").value.trim();
+  if (!task) { showToast("Nama task tidak boleh kosong", "error"); return; }
+
   const rowIndex = document.getElementById("editRowIndex").value;
-  const isEdit = !!rowIndex;
+  const isEdit   = !!rowIndex;
+  const btnSave  = document.getElementById("btnSave");
+
+  btnSave.disabled = true;
+  btnSave.textContent = "Menyimpan...";
+
   const payload = {
-    team: currentTeam,
+    team:   currentTeam,
     action: isEdit ? "update" : "create",
     data: {
-      judul: document.getElementById("fJudul").value,
-      deskripsi: document.getElementById("fDesc").value,
-      pic: document.getElementById("fPic").value,
+      task:   task,
       status: document.getElementById("fStatus").value,
-      progress: document.getElementById("fProgress").value,
-      tanggal: document.getElementById("fTanggal").value,
+      notes:  document.getElementById("fNotes").value.trim(),
     }
   };
   if (isEdit) payload.rowIndex = Number(rowIndex);
 
-  await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
-  closeModal();
-  loadTeam(currentTeam);
+  try {
+    const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+    const result = await res.json();
+    if (result.error) throw new Error(result.error);
+    showToast(result.message || "Berhasil disimpan", "success");
+    closeModal();
+    loadTeam(currentTeam);
+  } catch (err) {
+    showToast("Gagal menyimpan: " + err.message, "error");
+  } finally {
+    btnSave.disabled = false;
+    btnSave.textContent = "Simpan";
+  }
 }
 
+// ── Delete ──
 async function deleteRow(rowIndex) {
-  if (!confirm("Hapus rencana ini?")) return;
-  await fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify({ team: currentTeam, action: "delete", rowIndex })
-  });
-  loadTeam(currentTeam);
+  if (!confirm("Hapus task ini? Tindakan tidak bisa dibatalkan.")) return;
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({ team: currentTeam, action: "delete", rowIndex })
+    });
+    const result = await res.json();
+    if (result.error) throw new Error(result.error);
+    showToast("Task berhasil dihapus", "success");
+    loadTeam(currentTeam);
+  } catch (err) {
+    showToast("Gagal menghapus: " + err.message, "error");
+  }
 }
+
+// ── Utils ──
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;");
+}
+
+let toastTimer;
+function showToast(msg, type = "success") {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.className = `show ${type}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = ""; }, 3000);
+}
+
+// Close modal on overlay click
+document.getElementById("overlay").addEventListener("click", e => {
+  if (e.target === document.getElementById("overlay")) closeModal();
+});
 </script>
 </body>
 </html>
