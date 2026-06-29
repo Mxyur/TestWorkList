@@ -5,568 +5,349 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard Rencana Kerja Tim</title>
 <style>
-  /* ── Reset & Base ── */
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy:    #0f172a;
+  --blue:    #2563eb;
+  --blue-lt: #eff6ff;
+  --blue-bd: #bfdbfe;
+  --green:   #16a34a;
+  --green-lt:#f0fdf4;
+  --amber:   #d97706;
+  --amber-lt:#fffbeb;
+  --red:     #dc2626;
+  --red-lt:  #fef2f2;
+  --gray:    #6b7280;
+  --gray-lt: #f9fafb;
+  --border:  #e5e7eb;
+  --text:    #111827;
+  --text2:   #6b7280;
+  --radius:  8px;
+  --shadow:  0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+}
+body { font-family: system-ui,-apple-system,sans-serif; background:#f1f5f9; color:var(--text); min-height:100vh; }
 
-  :root {
-    --navy:    #0f172a;
-    --navy2:   #1e293b;
-    --blue:    #2563eb;
-    --blue-lt: #eff6ff;
-    --blue-bd: #bfdbfe;
-    --green:   #16a34a;
-    --green-lt:#f0fdf4;
-    --amber:   #d97706;
-    --amber-lt:#fffbeb;
-    --red:     #dc2626;
-    --red-lt:  #fef2f2;
-    --gray:    #6b7280;
-    --gray-lt: #f9fafb;
-    --border:  #e5e7eb;
-    --text:    #111827;
-    --text2:   #6b7280;
-    --radius:  8px;
-    --shadow:  0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
-  }
+/* Layout */
+.layout { display:flex; min-height:100vh; }
+.sidebar { width:220px; background:var(--navy); color:#fff; display:flex; flex-direction:column; flex-shrink:0; position:sticky; top:0; height:100vh; }
+.sidebar-logo { padding:24px 20px 16px; border-bottom:1px solid rgba(255,255,255,.08); }
+.logo-mark { font-size:10px; font-weight:600; letter-spacing:.1em; color:#64748b; text-transform:uppercase; margin-bottom:4px; }
+.sidebar-logo h1 { font-size:14px; font-weight:600; color:#f8fafc; line-height:1.4; }
+.sidebar-nav { padding:16px 12px; flex:1; overflow-y:auto; }
+.nav-label { font-size:10px; font-weight:600; letter-spacing:.1em; color:#475569; text-transform:uppercase; padding:0 8px; margin-bottom:6px; margin-top:12px; }
+.nav-label:first-child { margin-top:0; }
 
-  body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background: #f1f5f9;
-    color: var(--text);
-    min-height: 100vh;
-  }
+.nav-btn {
+  display:flex; align-items:center; gap:10px; width:100%;
+  padding:9px 12px; border:none; background:transparent;
+  color:#94a3b8; border-radius:6px; cursor:pointer;
+  font-size:13px; font-weight:500; text-align:left;
+  transition:background .15s,color .15s; margin-bottom:2px;
+}
+.nav-btn:hover { background:rgba(255,255,255,.07); color:#f8fafc; }
+.nav-btn.active { background:var(--blue); color:#fff; }
+.team-badge { margin-left:auto; background:rgba(255,255,255,.12); color:#94a3b8; font-size:10px; font-weight:600; padding:2px 7px; border-radius:10px; min-width:22px; text-align:center; }
+.nav-btn.active .team-badge { background:rgba(255,255,255,.25); color:#fff; }
 
-  /* ── Sidebar ── */
-  .layout { display: flex; min-height: 100vh; }
+.sidebar-footer { padding:14px 20px; border-top:1px solid rgba(255,255,255,.06); font-size:11px; color:#475569; }
 
-  .sidebar {
-    width: 220px;
-    background: var(--navy);
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-    position: sticky;
-    top: 0;
-    height: 100vh;
-  }
+/* Main */
+.main { flex:1; display:flex; flex-direction:column; min-width:0; }
+.topbar { background:#fff; border-bottom:1px solid var(--border); padding:0 28px; height:60px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.topbar-title { font-size:15px; font-weight:600; }
+.topbar-right { display:flex; align-items:center; gap:10px; }
+.search-box { display:flex; align-items:center; gap:8px; background:var(--gray-lt); border:1px solid var(--border); border-radius:var(--radius); padding:7px 12px; }
+.search-box input { border:none; background:transparent; font-size:13px; color:var(--text); outline:none; width:180px; }
+.search-box input::placeholder { color:var(--text2); }
+.filter-select { border:1px solid var(--border); border-radius:var(--radius); padding:7px 10px; font-size:13px; color:var(--text); background:#fff; cursor:pointer; outline:none; }
 
-  .sidebar-logo {
-    padding: 24px 20px 20px;
-    border-bottom: 1px solid rgba(255,255,255,.08);
-  }
-  .sidebar-logo .logo-mark {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: .1em;
-    color: #94a3b8;
-    text-transform: uppercase;
-    margin-bottom: 4px;
-  }
-  .sidebar-logo h1 {
-    font-size: 15px;
-    font-weight: 600;
-    line-height: 1.4;
-    color: #f8fafc;
-  }
+.btn-primary { display:flex; align-items:center; gap:6px; background:var(--blue); color:#fff; border:none; border-radius:var(--radius); padding:8px 16px; font-size:13px; font-weight:500; cursor:pointer; transition:background .15s; white-space:nowrap; }
+.btn-primary:hover { background:#1d4ed8; }
+.btn-primary:disabled { background:#93c5fd; cursor:not-allowed; }
+.btn-secondary { display:flex; align-items:center; gap:6px; background:#fff; color:var(--navy); border:1.5px solid var(--border); border-radius:var(--radius); padding:8px 16px; font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; white-space:nowrap; }
+.btn-secondary:hover { background:var(--navy); color:#fff; border-color:var(--navy); }
+.btn-green { display:flex; align-items:center; gap:6px; background:var(--green); color:#fff; border:none; border-radius:var(--radius); padding:8px 16px; font-size:13px; font-weight:500; cursor:pointer; transition:background .15s; white-space:nowrap; }
+.btn-green:hover { background:#15803d; }
 
-  .sidebar-nav { padding: 16px 12px; flex: 1; }
-  .sidebar-nav .nav-label {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: .1em;
-    color: #64748b;
-    text-transform: uppercase;
-    padding: 0 8px;
-    margin-bottom: 8px;
-  }
+/* Content */
+.content { padding:24px 28px; overflow-y:auto; flex:1; }
 
-  .team-btn {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    padding: 9px 12px;
-    border: none;
-    background: transparent;
-    color: #cbd5e1;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 500;
-    text-align: left;
-    transition: background .15s, color .15s;
-    margin-bottom: 2px;
-  }
-  .team-btn:hover { background: rgba(255,255,255,.06); color: #f8fafc; }
-  .team-btn.active { background: var(--blue); color: #fff; }
+/* Pages */
+.page { display:none; }
+.page.active { display:block; }
 
-  .team-badge {
-    margin-left: auto;
-    background: rgba(255,255,255,.15);
-    color: #fff;
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 7px;
-    border-radius: 10px;
-    min-width: 22px;
-    text-align: center;
-  }
-  .team-btn.active .team-badge { background: rgba(255,255,255,.25); }
+/* Summary page */
+.summary-hero { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:20px; }
+.hero-card { background:#fff; border-radius:10px; padding:16px 18px; box-shadow:var(--shadow); border:1px solid var(--border); }
+.hero-card .hc-team { font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text2); margin-bottom:8px; }
+.hero-card .hc-num { font-size:26px; font-weight:700; color:var(--blue); line-height:1; margin-bottom:2px; }
+.hero-card .hc-sub { font-size:11px; color:var(--text2); }
 
-  .sidebar-footer {
-    padding: 16px 20px;
-    border-top: 1px solid rgba(255,255,255,.08);
-    font-size: 11px;
-    color: #475569;
-  }
+.summary-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
+.summary-full { grid-template-columns:1fr; }
 
-  /* ── Main ── */
-  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.chart-card { background:#fff; border-radius:10px; box-shadow:var(--shadow); border:1px solid var(--border); padding:20px; }
+.chart-card h3 { font-size:13px; font-weight:600; margin-bottom:16px; color:var(--text); }
 
-  /* ── Topbar ── */
-  .topbar {
-    background: #fff;
-    border-bottom: 1px solid var(--border);
-    padding: 0 28px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-shrink: 0;
-  }
-  .topbar-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--text);
-  }
-  .topbar-right { display: flex; align-items: center; gap: 12px; }
+/* Progress bars per team */
+.team-progress-list { display:flex; flex-direction:column; gap:14px; }
+.tp-item {}
+.tp-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.tp-name { font-size:13px; font-weight:600; }
+.tp-pct { font-size:12px; font-weight:600; color:var(--blue); }
+.tp-bar { height:10px; background:#e5e7eb; border-radius:5px; overflow:hidden; }
+.tp-fill { height:10px; border-radius:5px; background:var(--blue); transition:width .6s ease; }
+.tp-stats { display:flex; gap:12px; margin-top:5px; }
+.tp-stat { font-size:11px; color:var(--text2); }
+.tp-stat span { font-weight:600; }
 
-  .search-box {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--gray-lt);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 7px 12px;
-  }
-  .search-box svg { color: var(--gray); flex-shrink: 0; }
-  .search-box input {
-    border: none;
-    background: transparent;
-    font-size: 13px;
-    color: var(--text);
-    outline: none;
-    width: 200px;
-  }
-  .search-box input::placeholder { color: var(--text2); }
+/* Status breakdown donut-like bars */
+.status-breakdown { display:flex; flex-direction:column; gap:10px; }
+.sb-row { display:flex; align-items:center; gap:10px; }
+.sb-label { width:90px; font-size:12px; color:var(--text2); flex-shrink:0; }
+.sb-bar-wrap { flex:1; height:8px; background:#e5e7eb; border-radius:4px; overflow:hidden; }
+.sb-bar { height:8px; border-radius:4px; transition:width .6s ease; }
+.sb-count { font-size:12px; font-weight:600; width:28px; text-align:right; flex-shrink:0; }
 
-  .filter-select {
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 7px 10px;
-    font-size: 13px;
-    color: var(--text);
-    background: #fff;
-    cursor: pointer;
-    outline: none;
-  }
+/* Grand total card */
+.grand-card { background:linear-gradient(135deg,#1e3a5f 0%,#0f172a 100%); color:#fff; border-radius:10px; padding:20px 24px; display:flex; align-items:center; gap:24px; margin-bottom:20px; }
+.grand-card .gc-num { font-size:42px; font-weight:700; line-height:1; }
+.grand-card .gc-label { font-size:12px; opacity:.6; margin-bottom:4px; }
+.grand-card .gc-sub { font-size:13px; opacity:.85; }
+.grand-divider { width:1px; background:rgba(255,255,255,.15); height:48px; }
+.grand-stats { display:flex; gap:24px; }
+.gs-item { text-align:center; }
+.gs-item .gs-n { font-size:22px; font-weight:700; }
+.gs-item .gs-l { font-size:11px; opacity:.6; margin-top:2px; }
 
-  .btn-add {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--blue);
-    color: #fff;
-    border: none;
-    border-radius: var(--radius);
-    padding: 8px 16px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background .15s;
-  }
-  .btn-add:hover { background: #1d4ed8; }
+/* All-team table on summary */
+.all-table { width:100%; border-collapse:collapse; }
+.all-table th { padding:10px 14px; text-align:left; font-size:11px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--text2); background:var(--gray-lt); border-bottom:1px solid var(--border); }
+.all-table td { padding:10px 14px; font-size:13px; border-bottom:1px solid var(--border); vertical-align:middle; }
+.all-table tr:last-child td { border-bottom:none; }
+.all-table tr:hover td { background:#f8fafc; }
 
-  /* ── Content ── */
-  .content { padding: 24px 28px; overflow-y: auto; flex: 1; }
+/* Team detail page */
+.stat-cards { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+.stat-card { background:#fff; border-radius:10px; padding:16px 18px; box-shadow:var(--shadow); border:1px solid var(--border); }
+.stat-card .stat-label { font-size:11px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--text2); margin-bottom:6px; }
+.stat-card .stat-value { font-size:26px; font-weight:700; line-height:1; margin-bottom:2px; }
+.stat-card .stat-sub { font-size:11px; color:var(--text2); }
 
-  /* ── Summary Cards ── */
-  .summary-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-    margin-bottom: 24px;
-  }
-  .stat-card {
-    background: #fff;
-    border-radius: 10px;
-    padding: 18px 20px;
-    box-shadow: var(--shadow);
-    border: 1px solid var(--border);
-  }
-  .stat-card .stat-label {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: .05em;
-    text-transform: uppercase;
-    color: var(--text2);
-    margin-bottom: 8px;
-  }
-  .stat-card .stat-value {
-    font-size: 28px;
-    font-weight: 700;
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-  .stat-card .stat-sub { font-size: 12px; color: var(--text2); }
-  .stat-value.blue  { color: var(--blue); }
-  .stat-value.green { color: var(--green); }
-  .stat-value.amber { color: var(--amber); }
-  .stat-value.red   { color: var(--red); }
+/* Table */
+.table-card { background:#fff; border-radius:10px; box-shadow:var(--shadow); border:1px solid var(--border); overflow:hidden; }
+.table-header { padding:14px 18px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.table-header h2 { font-size:14px; font-weight:600; }
+.table-header .count { font-size:12px; color:var(--text2); }
+table { width:100%; border-collapse:collapse; }
+thead th { padding:10px 14px; text-align:left; font-size:11px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--text2); background:var(--gray-lt); border-bottom:1px solid var(--border); white-space:nowrap; }
+tbody tr { border-bottom:1px solid var(--border); transition:background .1s; }
+tbody tr:last-child { border-bottom:none; }
+tbody tr:hover { background:#f8fafc; }
+td { padding:11px 14px; font-size:13px; vertical-align:top; }
+.td-id { color:var(--text2); font-size:12px; font-weight:500; width:40px; }
+.td-task { max-width:340px; }
+.td-task .task-text { font-weight:500; line-height:1.4; margin-bottom:3px; }
+.td-task .task-notes { font-size:12px; color:var(--text2); line-height:1.5; background:#f8fafc; border-left:2px solid var(--blue-bd); padding:4px 8px; border-radius:0 4px 4px 0; margin-top:4px; white-space:pre-wrap; word-break:break-word; }
+.td-ts { font-size:12px; color:var(--text2); white-space:nowrap; }
 
-  /* ── Table Card ── */
-  .table-card {
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: var(--shadow);
-    border: 1px solid var(--border);
-    overflow: hidden;
-  }
-  .table-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .table-header h2 { font-size: 14px; font-weight: 600; }
-  .table-header .count { font-size: 12px; color: var(--text2); }
+/* Badges */
+.badge { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; white-space:nowrap; }
+.badge::before { content:''; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.badge-todo      { background:#f3f4f6; color:#374151; }
+.badge-todo::before { background:#9ca3af; }
+.badge-inprogress { background:var(--blue-lt); color:#1e40af; }
+.badge-inprogress::before { background:var(--blue); }
+.badge-done      { background:var(--green-lt); color:#166534; }
+.badge-done::before { background:var(--green); }
+.badge-hold      { background:var(--amber-lt); color:#92400e; }
+.badge-hold::before { background:var(--amber); }
+.badge-cancelled  { background:var(--red-lt); color:#991b1b; }
+.badge-cancelled::before { background:var(--red); }
 
-  table { width: 100%; border-collapse: collapse; }
-  thead th {
-    padding: 10px 16px;
-    text-align: left;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: .05em;
-    text-transform: uppercase;
-    color: var(--text2);
-    background: var(--gray-lt);
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-  }
-  tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
-  tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: #f8fafc; }
-  td { padding: 12px 16px; font-size: 13px; vertical-align: top; }
+/* Action buttons */
+.actions { display:flex; gap:5px; }
+.btn-icon { border:1px solid var(--border); background:#fff; border-radius:6px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text2); transition:all .15s; }
+.btn-icon:hover { background:var(--gray-lt); color:var(--text); }
+.btn-icon.danger:hover { background:var(--red-lt); color:var(--red); border-color:#fca5a5; }
 
-  .td-id { color: var(--text2); font-size: 12px; font-weight: 500; width: 44px; }
-  .td-task { max-width: 320px; }
-  .td-task .task-text { font-weight: 500; line-height: 1.4; margin-bottom: 4px; }
-  .td-task .task-notes {
-    font-size: 12px;
-    color: var(--text2);
-    line-height: 1.5;
-    background: #f8fafc;
-    border-left: 2px solid var(--blue-bd);
-    padding: 4px 8px;
-    border-radius: 0 4px 4px 0;
-    margin-top: 4px;
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
-  .td-ts { font-size: 12px; color: var(--text2); white-space: nowrap; }
+/* States */
+.state-box { text-align:center; padding:56px 24px; color:var(--text2); }
+.state-box svg { margin:0 auto 12px; display:block; opacity:.25; }
+.state-box p { font-size:14px; } .state-box small { font-size:12px; opacity:.7; }
+.spinner { width:26px; height:26px; border:3px solid var(--border); border-top-color:var(--blue); border-radius:50%; animation:spin .7s linear infinite; margin:0 auto 12px; }
+@keyframes spin { to { transform:rotate(360deg); } }
 
-  /* Status badges */
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    white-space: nowrap;
-  }
-  .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-  .badge-todo    { background: #f3f4f6; color: #374151; }
-  .badge-todo::before { background: #9ca3af; }
-  .badge-inprogress { background: var(--blue-lt); color: #1e40af; }
-  .badge-inprogress::before { background: var(--blue); }
-  .badge-done    { background: var(--green-lt); color: #166534; }
-  .badge-done::before { background: var(--green); }
-  .badge-hold    { background: var(--amber-lt); color: #92400e; }
-  .badge-hold::before { background: var(--amber); }
-  .badge-cancelled { background: var(--red-lt); color: #991b1b; }
-  .badge-cancelled::before { background: var(--red); }
+/* Modal */
+.overlay { display:none; position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:200; align-items:center; justify-content:center; padding:20px; }
+.overlay.open { display:flex; }
+.modal { background:#fff; border-radius:12px; width:100%; max-width:480px; box-shadow:0 20px 60px rgba(0,0,0,.2); overflow:hidden; }
+.report-modal { background:#fff; border-radius:12px; width:100%; max-width:660px; max-height:82vh; display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(0,0,0,.2); overflow:hidden; }
+.modal-head { padding:18px 22px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.modal-head h2 { font-size:15px; font-weight:600; }
+.modal-close { background:none; border:none; cursor:pointer; color:var(--text2); padding:4px; border-radius:6px; display:flex; align-items:center; }
+.modal-close:hover { background:var(--gray-lt); color:var(--text); }
+.modal-body { padding:18px 22px; display:flex; flex-direction:column; gap:13px; }
+.report-pre { font-family:'Courier New',monospace; font-size:12px; line-height:1.75; color:var(--text); background:#f8fafc; padding:18px 22px; overflow-y:auto; flex:1; white-space:pre; border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+.modal-foot { padding:14px 22px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:10px; }
+.form-group { display:flex; flex-direction:column; gap:5px; }
+.form-group label { font-size:12px; font-weight:600; color:var(--text2); }
+.form-group input,.form-group select,.form-group textarea { border:1px solid var(--border); border-radius:var(--radius); padding:9px 12px; font-size:13px; color:var(--text); background:#fff; outline:none; font-family:inherit; transition:border-color .15s; }
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(37,99,235,.1); }
+.form-group textarea { resize:vertical; min-height:80px; line-height:1.6; }
+.btn-modal-cancel { padding:8px 18px; border:1px solid var(--border); background:#fff; border-radius:var(--radius); font-size:13px; font-weight:500; cursor:pointer; color:var(--text); }
+.btn-modal-cancel:hover { background:var(--gray-lt); }
+.btn-modal-save { padding:8px 20px; background:var(--blue); color:#fff; border:none; border-radius:var(--radius); font-size:13px; font-weight:500; cursor:pointer; }
+.btn-modal-save:hover { background:#1d4ed8; }
+.btn-modal-save:disabled { background:#93c5fd; cursor:not-allowed; }
 
-  /* Action buttons */
-  .actions { display: flex; gap: 6px; white-space: nowrap; }
-  .btn-icon {
-    border: 1px solid var(--border);
-    background: #fff;
-    border-radius: 6px;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: var(--text2);
-    transition: all .15s;
-  }
-  .btn-icon:hover { background: var(--gray-lt); color: var(--text); }
-  .btn-icon.danger:hover { background: var(--red-lt); color: var(--red); border-color: #fca5a5; }
+/* Toast */
+#toast { position:fixed; bottom:24px; right:24px; background:var(--navy); color:#fff; padding:11px 18px; border-radius:8px; font-size:13px; font-weight:500; opacity:0; transform:translateY(8px); transition:opacity .25s,transform .25s; z-index:999; pointer-events:none; }
+#toast.show { opacity:1; transform:translateY(0); }
+#toast.success { background:#15803d; }
+#toast.error   { background:var(--red); }
 
-  /* ── Empty / Loading states ── */
-  .state-box {
-    text-align: center;
-    padding: 60px 24px;
-    color: var(--text2);
-  }
-  .state-box svg { margin: 0 auto 12px; display: block; opacity: .3; }
-  .state-box p { font-size: 14px; }
-  .state-box small { font-size: 12px; opacity: .7; }
-
-  /* ── Spinner ── */
-  .spinner {
-    width: 28px; height: 28px;
-    border: 3px solid var(--border);
-    border-top-color: var(--blue);
-    border-radius: 50%;
-    animation: spin .7s linear infinite;
-    margin: 0 auto 12px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* ── Modal ── */
-  .overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(15,23,42,.45);
-    z-index: 200;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-  .overlay.open { display: flex; }
-
-  .modal {
-    background: #fff;
-    border-radius: 12px;
-    width: 100%;
-    max-width: 480px;
-    box-shadow: 0 20px 60px rgba(0,0,0,.2);
-    overflow: hidden;
-  }
-  .modal-head {
-    padding: 20px 24px 16px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .modal-head h2 { font-size: 15px; font-weight: 600; }
-  .modal-close {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--text2);
-    padding: 4px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .modal-close:hover { background: var(--gray-lt); color: var(--text); }
-
-  .modal-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; }
-
-  .form-group { display: flex; flex-direction: column; gap: 5px; }
-  .form-group label { font-size: 12px; font-weight: 600; color: var(--text2); }
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 9px 12px;
-    font-size: 13px;
-    color: var(--text);
-    background: #fff;
-    outline: none;
-    font-family: inherit;
-    transition: border-color .15s;
-  }
-  .form-group input:focus,
-  .form-group select:focus,
-  .form-group textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
-  .form-group textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
-
-  .modal-foot {
-    padding: 16px 24px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-  }
-  .btn-cancel {
-    padding: 8px 18px;
-    border: 1px solid var(--border);
-    background: #fff;
-    border-radius: var(--radius);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    color: var(--text);
-    transition: background .15s;
-  }
-  .btn-cancel:hover { background: var(--gray-lt); }
-  .btn-save {
-    padding: 8px 20px;
-    background: var(--blue);
-    color: #fff;
-    border: none;
-    border-radius: var(--radius);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background .15s;
-  }
-  .btn-save:hover { background: #1d4ed8; }
-  .btn-save:disabled { background: #93c5fd; cursor: not-allowed; }
-
-  /* Toast */
-  #toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: var(--navy);
-    color: #fff;
-    padding: 12px 18px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 500;
-    opacity: 0;
-    transform: translateY(8px);
-    transition: opacity .25s, transform .25s;
-    z-index: 999;
-    pointer-events: none;
-  }
-  #toast.show { opacity: 1; transform: translateY(0); }
-  #toast.success { background: #15803d; }
-  #toast.error   { background: var(--red); }
-
-  /* Responsive */
-  @media (max-width: 768px) {
-    .sidebar { display: none; }
-    .summary-grid { grid-template-columns: repeat(2, 1fr); }
-    .search-box input { width: 130px; }
-  }
+@media(max-width:768px){
+  .sidebar { display:none; }
+  .stat-cards,.summary-hero { grid-template-columns:repeat(2,1fr); }
+  .summary-row { grid-template-columns:1fr; }
+  .search-box input { width:120px; }
+}
 </style>
 </head>
 <body>
-
 <div class="layout">
 
-  <!-- ── Sidebar ── -->
-  <aside class="sidebar">
-    <div class="sidebar-logo">
-      <div class="logo-mark">Dashboard</div>
-      <h1>Rencana Kerja Tim</h1>
-    </div>
-    <nav class="sidebar-nav">
-      <div class="nav-label">Teams</div>
-      <div id="sidebarTeams"></div>
-    </nav>
-    <div class="sidebar-footer">
-      Terakhir refresh: <span id="lastRefresh">—</span>
-    </div>
-  </aside>
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">Dashboard</div>
+    <h1>Rencana Kerja Tim</h1>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Overview</div>
+    <button class="nav-btn active" id="navSummary" onclick="showPage('summary')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Summary
+    </button>
+    <div class="nav-label">Teams</div>
+    <div id="sidebarTeams"></div>
+  </nav>
+  <div class="sidebar-footer">Refresh: <span id="lastRefresh">—</span></div>
+</aside>
 
-  <!-- ── Main ── -->
-  <div class="main">
+<!-- Main -->
+<div class="main">
 
-    <!-- Topbar -->
-    <div class="topbar">
-      <div class="topbar-title" id="topbarTitle">Pilih team di sidebar</div>
-      <div class="topbar-right">
-        <div class="search-box">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-          </svg>
-          <input type="text" id="searchInput" placeholder="Cari task..." oninput="filterTable()">
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-title" id="topbarTitle">Summary Dashboard</div>
+    <div class="topbar-right">
+      <div class="search-box" id="searchWrap" style="display:none">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" id="searchInput" placeholder="Cari task..." oninput="filterTable()">
+      </div>
+      <select class="filter-select" id="statusFilter" style="display:none" onchange="filterTable()">
+        <option value="">Semua Status</option>
+        <option value="To Do">To Do</option>
+        <option value="In Progress">In Progress</option>
+        <option value="Done">Done</option>
+        <option value="On Hold">On Hold</option>
+        <option value="Cancelled">Cancelled</option>
+      </select>
+      <button class="btn-secondary" id="btnReport" onclick="generateReport()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Export Rekap
+      </button>
+      <button class="btn-primary" onclick="openModal()" id="btnAdd" style="display:none">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        Tambah Task
+      </button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- ═══ PAGE: SUMMARY ═══ -->
+    <div class="page active" id="pageSummary">
+
+      <!-- Grand total bar -->
+      <div class="grand-card" id="grandCard">
+        <div>
+          <div class="gc-label">Total Seluruh Task</div>
+          <div class="gc-num" id="gcTotal">—</div>
+          <div class="gc-sub" id="gcSub">Memuat data...</div>
         </div>
-        <select class="filter-select" id="statusFilter" onchange="filterTable()">
-          <option value="">Semua Status</option>
-          <option value="To Do">To Do</option>
-          <option value="In Progress">In Progress</option>
-          <option value="Done">Done</option>
-          <option value="On Hold">On Hold</option>
-          <option value="Cancelled">Cancelled</option>
-        </select>
-        <button class="btn-add" onclick="openModal()" id="btnAdd" disabled>
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <path d="M12 5v14M5 12h14"/>
-          </svg>
-          Tambah Task
-        </button>
+        <div class="grand-divider"></div>
+        <div class="grand-stats" id="grandStats"></div>
+      </div>
+
+      <!-- Per-team hero cards -->
+      <div class="summary-hero" id="heroCards">
+        <!-- filled by JS -->
+      </div>
+
+      <!-- 2-col charts -->
+      <div class="summary-row">
+        <!-- Progress per team -->
+        <div class="chart-card">
+          <h3>Progress Completion per Team</h3>
+          <div class="team-progress-list" id="teamProgressList"></div>
+        </div>
+        <!-- Status breakdown -->
+        <div class="chart-card">
+          <h3>Distribusi Status (Semua Team)</h3>
+          <div class="status-breakdown" id="statusBreakdown"></div>
+        </div>
+      </div>
+
+      <!-- All-task table -->
+      <div class="table-card">
+        <div class="table-header">
+          <h2>Semua Task</h2>
+          <span class="count" id="allTaskCount">—</span>
+        </div>
+        <div id="allTableWrap">
+          <div class="state-box"><div class="spinner"></div><p>Memuat data...</p></div>
+        </div>
       </div>
     </div>
 
-    <!-- Content -->
-    <div class="content">
-
-      <!-- Summary cards -->
-      <div class="summary-grid" id="summaryGrid">
-        <div class="stat-card"><div class="stat-label">Total Task</div><div class="stat-value blue" id="sTotal">—</div><div class="stat-sub">semua status</div></div>
-        <div class="stat-card"><div class="stat-label">Selesai</div><div class="stat-value green" id="sDone">—</div><div class="stat-sub">Done</div></div>
-        <div class="stat-card"><div class="stat-label">Berjalan</div><div class="stat-value amber" id="sProgress">—</div><div class="stat-sub">In Progress</div></div>
-        <div class="stat-card"><div class="stat-label">Belum Mulai</div><div class="stat-value" id="sTodo" style="color:var(--gray)">—</div><div class="stat-sub">To Do</div></div>
+    <!-- ═══ PAGE: TEAM DETAIL ═══ -->
+    <div class="page" id="pageTeam">
+      <div class="stat-cards">
+        <div class="stat-card"><div class="stat-label">Total Task</div><div class="stat-value" style="color:var(--blue)" id="sTotal">—</div><div class="stat-sub">semua status</div></div>
+        <div class="stat-card"><div class="stat-label">Selesai</div><div class="stat-value" style="color:var(--green)" id="sDone">—</div><div class="stat-sub">Done</div></div>
+        <div class="stat-card"><div class="stat-label">Berjalan</div><div class="stat-value" style="color:var(--amber)" id="sProgress">—</div><div class="stat-sub">In Progress</div></div>
+        <div class="stat-card"><div class="stat-label">Belum Mulai</div><div class="stat-value" style="color:var(--gray)" id="sTodo">—</div><div class="stat-sub">To Do</div></div>
       </div>
-
-      <!-- Table -->
       <div class="table-card">
         <div class="table-header">
           <h2 id="tableHeading">—</h2>
           <span class="count" id="tableCount"></span>
         </div>
         <div id="tableWrap">
-          <div class="state-box">
-            <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
-              <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
-              <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
-            </svg>
-            <p>Pilih team dari sidebar untuk melihat data</p>
-          </div>
+          <div class="state-box"><p>Pilih team dari sidebar</p></div>
         </div>
       </div>
-
     </div>
+
   </div>
 </div>
+</div>
 
-<!-- ── Modal Tambah / Edit ── -->
+<!-- Modal Tambah/Edit -->
 <div class="overlay" id="overlay">
   <div class="modal">
     <div class="modal-head">
       <h2 id="modalTitle">Tambah Task Baru</h2>
-      <button class="modal-close" onclick="closeModal()">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path d="M18 6L6 18M6 6l12 12"/>
-        </svg>
-      </button>
+      <button class="modal-close" onclick="closeModal()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="editRowIndex">
-      <div class="form-group">
-        <label>Nama Task <span style="color:var(--red)">*</span></label>
-        <textarea id="fTask" placeholder="Deskripsi singkat task / kegiatan..." rows="3"></textarea>
-      </div>
-      <div class="form-group">
-        <label>Status</label>
+      <div class="form-group"><label>Nama Task *</label><textarea id="fTask" rows="3" placeholder="Deskripsi singkat task / kegiatan..."></textarea></div>
+      <div class="form-group"><label>Status</label>
         <select id="fStatus">
           <option value="To Do">To Do</option>
           <option value="In Progress">In Progress</option>
@@ -575,37 +356,61 @@
           <option value="Cancelled">Cancelled</option>
         </select>
       </div>
-      <div class="form-group">
-        <label>Catatan / Notes</label>
-        <textarea id="fNotes" placeholder="Tambahkan catatan, update terkini, kendala, atau informasi lain yang perlu dicatat..." rows="4"></textarea>
-      </div>
+      <div class="form-group"><label>Catatan / Notes</label><textarea id="fNotes" rows="4" placeholder="Catatan, update terkini, kendala..."></textarea></div>
     </div>
     <div class="modal-foot">
-      <button class="btn-cancel" onclick="closeModal()">Batal</button>
-      <button class="btn-save" id="btnSave" onclick="saveData()">Simpan</button>
+      <button class="btn-modal-cancel" onclick="closeModal()">Batal</button>
+      <button class="btn-modal-save" id="btnSave" onclick="saveData()">Simpan</button>
     </div>
   </div>
 </div>
 
-<!-- Toast -->
+<!-- Modal Report -->
+<div class="overlay" id="reportOverlay">
+  <div class="report-modal">
+    <div class="modal-head">
+      <h2 id="reportTitle">Export Rekap Progress</h2>
+      <button class="modal-close" onclick="closeReport()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <pre class="report-pre" id="reportContent">Memuat data...</pre>
+    <div class="modal-foot">
+      <button class="btn-modal-cancel" onclick="closeReport()">Tutup</button>
+      <button class="btn-green" onclick="downloadReport()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download .txt
+      </button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
-// ──────────────────────────────────────────────
-//  GANTI nilai ini dengan URL deployment Apps Script kamu
-// ──────────────────────────────────────────────
+// ── Ganti dengan URL /exec dari Apps Script deployment kamu ──
 const API_URL = "https://script.google.com/macros/s/AKfycbztLRhJdi1h-UPD56T5lm9eSeEAKf7AF0QbKs7DpiU5L2dumTcB9Zc8aW6tIt5Wa6Amiw/exec";
 
-const TEAMS = ["WCA", "FMA", "DSA", "OSD", "MSD"];
+const TEAMS = ["WCA","FMA","DSA","OSD","MSD"];
 let currentTeam = null;
-let allData = [];        // raw data dari API untuk team aktif
-let filteredData = [];   // setelah search + filter
+let allData     = [];
+let filteredData= [];
+let summaryData = {}; // { WCA:[...], FMA:[...], ... }
 
-// ── Init sidebar ──
+// ── apiFetch helper (handle Apps Script CORS redirect) ──
+async function apiFetch(url, options = {}) {
+  const res = await fetch(url, {
+    ...options,
+    redirect: "follow",
+    headers: { "Content-Type": "text/plain" },
+  });
+  return res.json();
+}
+
+// ── Build sidebar team buttons ──
 const sidebarEl = document.getElementById("sidebarTeams");
 TEAMS.forEach(t => {
   const btn = document.createElement("button");
-  btn.className = "team-btn";
+  btn.className = "nav-btn";
+  btn.id = "nav-" + t;
   btn.dataset.team = t;
   btn.innerHTML = `
     <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
@@ -619,68 +424,189 @@ TEAMS.forEach(t => {
   sidebarEl.appendChild(btn);
 });
 
-// Preload semua badge count
-async function loadAllCounts() {
-  try {
-    const res = await fetch(API_URL);
-    const data = await res.json();
-    TEAMS.forEach(t => {
-      const el = document.getElementById(`badge-${t}`);
-      if (el && data[t]) el.textContent = data[t].length;
-    });
-  } catch (_) {}
-}
-loadAllCounts();
+// ── Page switcher ──
+function showPage(page) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
 
-// ── Load data satu team ──
-async function loadTeam(team) {
-  currentTeam = team;
-  document.getElementById("btnAdd").disabled = false;
-
-  document.querySelectorAll(".team-btn").forEach(b =>
-    b.classList.toggle("active", b.dataset.team === team));
-  document.getElementById("topbarTitle").textContent = `Team ${team}`;
-  document.getElementById("tableHeading").textContent = `Daftar Task — ${team}`;
-  document.getElementById("tableCount").textContent = "";
-
-  setLoading();
-
-  try {
-    const res = await fetch(`${API_URL}?team=${team}`);
-    allData = await res.json();
-    if (!Array.isArray(allData)) throw new Error("Respons tidak valid");
-    updateSummary(allData);
-    filterTable();
-    const ts = new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
-    document.getElementById("lastRefresh").textContent = ts;
-    // update badge sidebar
-    const badgeEl = document.getElementById(`badge-${team}`);
-    if (badgeEl) badgeEl.textContent = allData.length;
-  } catch (e) {
-    document.getElementById("tableWrap").innerHTML = `
-      <div class="state-box">
-        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>
-        </svg>
-        <p>Gagal memuat data</p>
-        <small>Pastikan API_URL sudah diisi dan Apps Script sudah di-deploy</small>
-      </div>`;
+  if (page === "summary") {
+    document.getElementById("pageSummary").classList.add("active");
+    document.getElementById("navSummary").classList.add("active");
+    document.getElementById("topbarTitle").textContent = "Summary Dashboard";
+    document.getElementById("searchWrap").style.display   = "none";
+    document.getElementById("statusFilter").style.display = "none";
+    document.getElementById("btnAdd").style.display       = "none";
+    currentTeam = null;
+    loadSummary();
+  } else {
+    document.getElementById("pageTeam").classList.add("active");
+    const btn = document.getElementById("nav-" + page);
+    if (btn) btn.classList.add("active");
   }
 }
 
-function setLoading() {
-  document.getElementById("tableWrap").innerHTML = `
-    <div class="state-box"><div class="spinner"></div><p>Memuat data...</p></div>`;
+// ══════════════════════════════════════════
+//  SUMMARY PAGE
+// ══════════════════════════════════════════
+async function loadSummary() {
+  try {
+    summaryData = await apiFetch(API_URL);
+    renderSummaryPage(summaryData);
+    const ts = new Date().toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"});
+    document.getElementById("lastRefresh").textContent = ts;
+
+    // Update sidebar badges
+    TEAMS.forEach(t => {
+      const el = document.getElementById("badge-" + t);
+      if (el && summaryData[t]) el.textContent = summaryData[t].length;
+    });
+  } catch(e) {
+    document.getElementById("allTableWrap").innerHTML =
+      `<div class="state-box"><p>Gagal memuat. Cek API_URL.</p><small>${e.message}</small></div>`;
+  }
 }
 
-// ── Filter (search + status) ──
+function renderSummaryPage(data) {
+  let grandTotal=0, grandDone=0, grandProg=0, grandTodo=0, grandHold=0;
+  const teamStats = {};
+
+  TEAMS.forEach(t => {
+    const rows  = data[t] || [];
+    const total = rows.length;
+    const done  = rows.filter(r => r["Status"]==="Done").length;
+    const prog  = rows.filter(r => r["Status"]==="In Progress").length;
+    const todo  = rows.filter(r => r["Status"]==="To Do").length;
+    const hold  = rows.filter(r => r["Status"]==="On Hold").length;
+    const canc  = rows.filter(r => r["Status"]==="Cancelled").length;
+    const pct   = total ? Math.round(done/total*100) : 0;
+    teamStats[t] = { total, done, prog, todo, hold, canc, pct, rows };
+    grandTotal+=total; grandDone+=done; grandProg+=prog; grandTodo+=todo; grandHold+=hold;
+  });
+
+  // Grand card
+  document.getElementById("gcTotal").textContent = grandTotal;
+  const grandPct = grandTotal ? Math.round(grandDone/grandTotal*100) : 0;
+  document.getElementById("gcSub").textContent = `${grandPct}% selesai dari seluruh rencana kerja`;
+  document.getElementById("grandStats").innerHTML = [
+    ["Done", grandDone, "#4ade80"],
+    ["Progress", grandProg, "#60a5fa"],
+    ["To Do", grandTodo, "#94a3b8"],
+    ["On Hold", grandHold, "#fbbf24"],
+  ].map(([l,n,c]) => `
+    <div class="gs-item">
+      <div class="gs-n" style="color:${c}">${n}</div>
+      <div class="gs-l">${l}</div>
+    </div>`).join('<div style="width:1px;background:rgba(255,255,255,.1);height:40px;align-self:center"></div>');
+
+  // Hero cards per team
+  document.getElementById("heroCards").innerHTML = TEAMS.map(t => {
+    const s = teamStats[t];
+    const color = s.pct >= 70 ? "var(--green)" : s.pct >= 40 ? "var(--amber)" : "var(--blue)";
+    return `<div class="hero-card">
+      <div class="hc-team">${t}</div>
+      <div class="hc-num" style="color:${color}">${s.pct}%</div>
+      <div class="hc-sub">${s.done}/${s.total} task selesai</div>
+    </div>`;
+  }).join("");
+
+  // Progress bars
+  document.getElementById("teamProgressList").innerHTML = TEAMS.map(t => {
+    const s = teamStats[t];
+    const color = s.pct>=70?"var(--green)":s.pct>=40?"var(--amber)":"var(--blue)";
+    return `<div class="tp-item">
+      <div class="tp-header">
+        <span class="tp-name">${t}</span>
+        <span class="tp-pct" style="color:${color}">${s.pct}%</span>
+      </div>
+      <div class="tp-bar"><div class="tp-fill" style="width:${s.pct}%;background:${color}"></div></div>
+      <div class="tp-stats">
+        <span class="tp-stat">Done: <span>${s.done}</span></span>
+        <span class="tp-stat">Progress: <span>${s.prog}</span></span>
+        <span class="tp-stat">To Do: <span>${s.todo}</span></span>
+        ${s.hold ? `<span class="tp-stat">Hold: <span>${s.hold}</span></span>` : ""}
+      </div>
+    </div>`;
+  }).join("");
+
+  // Status breakdown
+  const statuses = [
+    ["Done",        grandDone,  "var(--green)", "badge-done"],
+    ["In Progress", grandProg,  "var(--blue)",  "badge-inprogress"],
+    ["To Do",       grandTodo,  "#9ca3af",      "badge-todo"],
+    ["On Hold",     grandHold,  "var(--amber)", "badge-hold"],
+  ];
+  document.getElementById("statusBreakdown").innerHTML = statuses.map(([label,n,color]) => {
+    const pct = grandTotal ? Math.round(n/grandTotal*100) : 0;
+    return `<div class="sb-row">
+      <div class="sb-label">${label}</div>
+      <div class="sb-bar-wrap"><div class="sb-bar" style="width:${pct}%;background:${color}"></div></div>
+      <div class="sb-count">${n}</div>
+    </div>`;
+  }).join("");
+
+  // All-task table
+  const allRows = TEAMS.flatMap(t => (data[t]||[]).map(r => ({...r, _team:t})));
+  document.getElementById("allTaskCount").textContent = `${allRows.length} task`;
+  if (!allRows.length) {
+    document.getElementById("allTableWrap").innerHTML =
+      `<div class="state-box"><p>Belum ada data</p></div>`;
+    return;
+  }
+  const trs = allRows.map(r => `
+    <tr>
+      <td class="td-id">#${r["ID"]}</td>
+      <td><span class="badge ${badgeClass(r["_team"])}-team" style="background:var(--blue-lt);color:#1e40af;font-size:11px;padding:2px 8px">${r["_team"]}</span></td>
+      <td class="td-task">
+        <div class="task-text">${escHtml(r["Task"]||"—")}</div>
+        ${r["Notes"]?`<div class="task-notes">${escHtml(r["Notes"])}</div>`:""}
+      </td>
+      <td>${statusBadge(r["Status"])}</td>
+      <td class="td-ts">${r["Timestamp"]||"—"}</td>
+    </tr>`).join("");
+  document.getElementById("allTableWrap").innerHTML = `
+    <table class="all-table">
+      <thead><tr><th>ID</th><th>Team</th><th>Task / Kegiatan</th><th>Status</th><th>Timestamp</th></tr></thead>
+      <tbody>${trs}</tbody>
+    </table>`;
+}
+
+// ══════════════════════════════════════════
+//  TEAM DETAIL PAGE
+// ══════════════════════════════════════════
+async function loadTeam(team) {
+  currentTeam = team;
+  showPage(team);
+
+  document.getElementById("topbarTitle").textContent = `Team ${team}`;
+  document.getElementById("tableHeading").textContent = `Daftar Task — ${team}`;
+  document.getElementById("tableCount").textContent = "";
+  document.getElementById("searchWrap").style.display   = "flex";
+  document.getElementById("statusFilter").style.display = "block";
+  document.getElementById("btnAdd").style.display       = "flex";
+
+  document.getElementById("tableWrap").innerHTML =
+    `<div class="state-box"><div class="spinner"></div><p>Memuat data...</p></div>`;
+
+  try {
+    allData = await apiFetch(`${API_URL}?team=${team}`);
+    if (!Array.isArray(allData)) throw new Error("Respons tidak valid");
+    updateTeamStats(allData);
+    filterTable();
+    const ts = new Date().toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"});
+    document.getElementById("lastRefresh").textContent = ts;
+    const badgeEl = document.getElementById("badge-" + team);
+    if (badgeEl) badgeEl.textContent = allData.length;
+  } catch(e) {
+    document.getElementById("tableWrap").innerHTML =
+      `<div class="state-box"><p>Gagal memuat data</p><small>${e.message}</small></div>`;
+  }
+}
+
 function filterTable() {
   const q = document.getElementById("searchInput").value.toLowerCase();
   const s = document.getElementById("statusFilter").value;
   filteredData = allData.filter(r => {
-    const taskText = (r["Task"] || "").toLowerCase();
-    const notesText = (r["Notes"] || "").toLowerCase();
-    const matchQ = !q || taskText.includes(q) || notesText.includes(q);
+    const matchQ = !q || (r["Task"]||"").toLowerCase().includes(q) || (r["Notes"]||"").toLowerCase().includes(q);
     const matchS = !s || r["Status"] === s;
     return matchQ && matchS;
   });
@@ -691,189 +617,229 @@ function filterTable() {
       : `${allData.length} task`;
 }
 
-// ── Render table ──
 function renderTable(data) {
   if (!data.length) {
-    document.getElementById("tableWrap").innerHTML = `
-      <div class="state-box">
-        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
-          <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
-          <rect x="9" y="3" width="6" height="4" rx="1"/>
-        </svg>
-        <p>Belum ada task</p>
-        <small>Klik "Tambah Task" untuk menambahkan rencana kerja baru</small>
-      </div>`;
+    document.getElementById("tableWrap").innerHTML =
+      `<div class="state-box"><p>Belum ada task</p><small>Klik "Tambah Task" untuk menambahkan</small></div>`;
     return;
   }
-
-  const rows = data.map(r => {
-    const notes = r["Notes"] ? `<div class="task-notes">${escHtml(r["Notes"])}</div>` : "";
-    return `
-      <tr>
-        <td class="td-id">#${r["ID"]}</td>
-        <td class="td-task">
-          <div class="task-text">${escHtml(r["Task"] || "—")}</div>
-          ${notes}
-        </td>
-        <td>${statusBadge(r["Status"])}</td>
-        <td class="td-ts">${r["Timestamp"] || "—"}</td>
-        <td>
-          <div class="actions">
-            <button class="btn-icon" title="Edit" onclick='editRow(${r.rowIndex}, ${JSON.stringify(r).replace(/'/g, "&#39;")})'>
-              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-              </svg>
-            </button>
-            <button class="btn-icon danger" title="Hapus" onclick="deleteRow(${r.rowIndex})">
-              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
-                <path d="M10 11v6M14 11v6M9 6V4h6v2"/>
-              </svg>
-            </button>
-          </div>
-        </td>
-      </tr>`;
-  }).join("");
-
+  const rows = data.map(r => `
+    <tr>
+      <td class="td-id">#${r["ID"]}</td>
+      <td class="td-task">
+        <div class="task-text">${escHtml(r["Task"]||"—")}</div>
+        ${r["Notes"]?`<div class="task-notes">${escHtml(r["Notes"])}</div>`:""}
+      </td>
+      <td>${statusBadge(r["Status"])}</td>
+      <td class="td-ts">${r["Timestamp"]||"—"}</td>
+      <td>
+        <div class="actions">
+          <button class="btn-icon" title="Edit" onclick='editRow(${r.rowIndex},${JSON.stringify(r).replace(/'/g,"&#39;")})'>
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="btn-icon danger" title="Hapus" onclick="deleteRow(${r.rowIndex})">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6M9 6V4h6v2"/></svg>
+          </button>
+        </div>
+      </td>
+    </tr>`).join("");
   document.getElementById("tableWrap").innerHTML = `
     <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Task / Kegiatan</th>
-          <th>Status</th>
-          <th>Timestamp</th>
-          <th>Aksi</th>
-        </tr>
-      </thead>
+      <thead><tr><th>ID</th><th>Task / Kegiatan</th><th>Status</th><th>Timestamp</th><th>Aksi</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
 }
 
-// ── Summary cards ──
-function updateSummary(data) {
-  const total = data.length;
-  const done  = data.filter(r => r["Status"] === "Done").length;
-  const prog  = data.filter(r => r["Status"] === "In Progress").length;
-  const todo  = data.filter(r => r["Status"] === "To Do").length;
-  document.getElementById("sTotal").textContent   = total;
-  document.getElementById("sDone").textContent    = done;
-  document.getElementById("sProgress").textContent = prog;
-  document.getElementById("sTodo").textContent    = todo;
+function updateTeamStats(data) {
+  document.getElementById("sTotal").textContent    = data.length;
+  document.getElementById("sDone").textContent     = data.filter(r=>r["Status"]==="Done").length;
+  document.getElementById("sProgress").textContent = data.filter(r=>r["Status"]==="In Progress").length;
+  document.getElementById("sTodo").textContent     = data.filter(r=>r["Status"]==="To Do").length;
 }
 
-// ── Status badge ──
-function statusBadge(s) {
-  const map = {
-    "To Do":       "badge-todo",
-    "In Progress": "badge-inprogress",
-    "Done":        "badge-done",
-    "On Hold":     "badge-hold",
-    "Cancelled":   "badge-cancelled",
-  };
-  const cls = map[s] || "badge-todo";
-  return `<span class="badge ${cls}">${escHtml(s || "To Do")}</span>`;
-}
-
-// ── Modal ──
-function openModal(isEdit = false) {
+// ── Modal CRUD ──
+function openModal(isEdit=false) {
   document.getElementById("modalTitle").textContent = isEdit ? "Edit Task" : "Tambah Task Baru";
   document.getElementById("overlay").classList.add("open");
 }
 function closeModal() {
   document.getElementById("overlay").classList.remove("open");
-  document.getElementById("fTask").value = "";
+  ["fTask","fNotes","editRowIndex"].forEach(id => document.getElementById(id).value="");
   document.getElementById("fStatus").value = "To Do";
-  document.getElementById("fNotes").value = "";
-  document.getElementById("editRowIndex").value = "";
 }
-
 function editRow(rowIndex, row) {
   document.getElementById("editRowIndex").value = rowIndex;
-  document.getElementById("fTask").value   = row["Task"]   || "";
-  document.getElementById("fStatus").value = row["Status"] || "To Do";
-  document.getElementById("fNotes").value  = row["Notes"]  || "";
+  document.getElementById("fTask").value   = row["Task"]  ||"";
+  document.getElementById("fStatus").value = row["Status"]||"To Do";
+  document.getElementById("fNotes").value  = row["Notes"] ||"";
   openModal(true);
 }
-
-// ── Save (create / update) ──
 async function saveData() {
   const task = document.getElementById("fTask").value.trim();
-  if (!task) { showToast("Nama task tidak boleh kosong", "error"); return; }
-
+  if (!task) { showToast("Nama task tidak boleh kosong","error"); return; }
   const rowIndex = document.getElementById("editRowIndex").value;
-  const isEdit   = !!rowIndex;
   const btnSave  = document.getElementById("btnSave");
-
-  btnSave.disabled = true;
-  btnSave.textContent = "Menyimpan...";
-
+  btnSave.disabled = true; btnSave.textContent = "Menyimpan...";
   const payload = {
-    team:   currentTeam,
-    action: isEdit ? "update" : "create",
-    data: {
-      task:   task,
-      status: document.getElementById("fStatus").value,
-      notes:  document.getElementById("fNotes").value.trim(),
-    }
+    team: currentTeam, action: rowIndex?"update":"create",
+    data: { task, status:document.getElementById("fStatus").value, notes:document.getElementById("fNotes").value.trim() }
   };
-  if (isEdit) payload.rowIndex = Number(rowIndex);
-
+  if (rowIndex) payload.rowIndex = Number(rowIndex);
   try {
-    const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
-    const result = await res.json();
+    const result = await apiFetch(API_URL, { method:"POST", body:JSON.stringify(payload) });
     if (result.error) throw new Error(result.error);
-    showToast(result.message || "Berhasil disimpan", "success");
-    closeModal();
-    loadTeam(currentTeam);
-  } catch (err) {
-    showToast("Gagal menyimpan: " + err.message, "error");
-  } finally {
-    btnSave.disabled = false;
-    btnSave.textContent = "Simpan";
-  }
+    showToast(result.message||"Berhasil disimpan","success");
+    closeModal(); loadTeam(currentTeam);
+  } catch(err) { showToast("Gagal: "+err.message,"error"); }
+  finally { btnSave.disabled=false; btnSave.textContent="Simpan"; }
 }
-
-// ── Delete ──
 async function deleteRow(rowIndex) {
-  if (!confirm("Hapus task ini? Tindakan tidak bisa dibatalkan.")) return;
+  if (!confirm("Hapus task ini?")) return;
   try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      body: JSON.stringify({ team: currentTeam, action: "delete", rowIndex })
-    });
-    const result = await res.json();
+    const result = await apiFetch(API_URL, { method:"POST", body:JSON.stringify({ team:currentTeam, action:"delete", rowIndex }) });
     if (result.error) throw new Error(result.error);
-    showToast("Task berhasil dihapus", "success");
-    loadTeam(currentTeam);
-  } catch (err) {
-    showToast("Gagal menghapus: " + err.message, "error");
+    showToast("Task dihapus","success"); loadTeam(currentTeam);
+  } catch(err) { showToast("Gagal: "+err.message,"error"); }
+}
+
+// ══════════════════════════════════════════
+//  GENERATE REPORT
+// ══════════════════════════════════════════
+let reportText = "";
+
+async function generateReport() {
+  document.getElementById("reportOverlay").classList.add("open");
+  document.getElementById("reportContent").textContent = "Memuat data semua team...";
+  reportText = "";
+
+  try {
+    const data = await apiFetch(API_URL);
+    const now  = new Date();
+    const tgl  = now.toLocaleDateString("id-ID",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+    const jam  = now.toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"});
+    const DIV  = "=".repeat(62);
+    const div  = "-".repeat(62);
+    let lines  = [];
+
+    lines.push(DIV);
+    lines.push("  REKAP PROGRESS RENCANA KERJA TIM");
+    lines.push(`  Tanggal  : ${tgl}`);
+    lines.push(`  Jam      : ${jam} WIB`);
+    lines.push(DIV);
+    lines.push("");
+
+    // Grand total
+    let gTotal=0,gDone=0,gProg=0,gTodo=0,gHold=0,gCanc=0;
+    const ts = {};
+    TEAMS.forEach(t => {
+      const rows = data[t]||[];
+      const d=rows.filter(r=>r["Status"]==="Done").length;
+      const p=rows.filter(r=>r["Status"]==="In Progress").length;
+      const td=rows.filter(r=>r["Status"]==="To Do").length;
+      const h=rows.filter(r=>r["Status"]==="On Hold").length;
+      const c=rows.filter(r=>r["Status"]==="Cancelled").length;
+      ts[t]={total:rows.length,done:d,prog:p,todo:td,hold:h,canc:c,pct:rows.length?Math.round(d/rows.length*100):0};
+      gTotal+=rows.length;gDone+=d;gProg+=p;gTodo+=td;gHold+=h;gCanc+=c;
+    });
+    const gPct = gTotal?Math.round(gDone/gTotal*100):0;
+
+    lines.push("RINGKASAN SEMUA TEAM");
+    lines.push(div);
+    lines.push(`${"Team".padEnd(8)} ${"Progress Bar".padEnd(24)} ${"Pct".padStart(4)}  ${"Total".padStart(5)}  ${"Done".padStart(5)}  ${"Prog".padStart(5)}  ${"Todo".padStart(5)}  ${"Hold".padStart(5)}`);
+    lines.push(div);
+    TEAMS.forEach(t => {
+      const s = ts[t];
+      lines.push(`${t.padEnd(8)} ${makeBar(s.pct)} ${String(s.pct).padStart(3)}%  ${String(s.total).padStart(5)}  ${String(s.done).padStart(5)}  ${String(s.prog).padStart(5)}  ${String(s.todo).padStart(5)}  ${String(s.hold).padStart(5)}`);
+    });
+    lines.push(div);
+    lines.push(`${"TOTAL".padEnd(8)} ${makeBar(gPct)} ${String(gPct).padStart(3)}%  ${String(gTotal).padStart(5)}  ${String(gDone).padStart(5)}  ${String(gProg).padStart(5)}  ${String(gTodo).padStart(5)}  ${String(gHold).padStart(5)}`);
+    lines.push("");
+
+    // Detail per team
+    TEAMS.forEach(t => {
+      const rows = data[t]||[];
+      const s    = ts[t];
+      lines.push("");
+      lines.push(DIV);
+      lines.push(`  TEAM ${t}  —  ${s.pct}% selesai  (${s.done}/${s.total} task)`);
+      lines.push(DIV);
+      if (!rows.length){ lines.push("  Belum ada data."); return; }
+
+      const groups = {
+        "In Progress": rows.filter(r=>r["Status"]==="In Progress"),
+        "To Do":       rows.filter(r=>r["Status"]==="To Do"),
+        "Done":        rows.filter(r=>r["Status"]==="Done"),
+        "On Hold":     rows.filter(r=>r["Status"]==="On Hold"),
+        "Cancelled":   rows.filter(r=>r["Status"]==="Cancelled"),
+      };
+      const icons = {"In Progress":"▶","To Do":"○","Done":"✓","On Hold":"⏸","Cancelled":"✗"};
+      Object.entries(groups).forEach(([status,items]) => {
+        if (!items.length) return;
+        lines.push("");
+        lines.push(`  ${icons[status]||"•"} ${status.toUpperCase()} (${items.length})`);
+        lines.push("  " + div.slice(2));
+        items.forEach((r,i) => {
+          lines.push(`  ${String(i+1).padStart(2)}. [#${r["ID"]}] ${r["Task"]||"-"}`);
+          if (r["Notes"]&&r["Notes"].toString().trim()) {
+            r["Notes"].toString().trim().split("\n").forEach(nl => lines.push(`      → ${nl}`));
+          }
+          lines.push(`      Timestamp: ${r["Timestamp"]||"-"}`);
+        });
+      });
+    });
+
+    lines.push("");
+    lines.push(DIV);
+    lines.push("  [END OF REPORT]");
+    lines.push(DIV);
+
+    reportText = lines.join("\n");
+    document.getElementById("reportContent").textContent = reportText;
+    document.getElementById("reportTitle").textContent   = `Rekap Progress — ${tgl}`;
+  } catch(err) {
+    document.getElementById("reportContent").textContent = "Gagal memuat: " + err.message;
   }
 }
 
-// ── Utils ──
-function escHtml(str) {
-  return String(str)
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;");
+function makeBar(pct) {
+  const f = Math.round(pct/5);
+  return "[" + "█".repeat(f) + "░".repeat(20-f) + "]";
+}
+function closeReport() { document.getElementById("reportOverlay").classList.remove("open"); }
+function downloadReport() {
+  if (!reportText) return;
+  const ts   = new Date().toISOString().slice(0,10);
+  const blob = new Blob([reportText],{type:"text/plain;charset=utf-8"});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href=url; a.download=`rekap-progress-${ts}.txt`; a.click();
+  URL.revokeObjectURL(url);
+  showToast("Rekap berhasil didownload","success");
 }
 
+// ── Helpers ──
+function statusBadge(s) {
+  const map={"To Do":"badge-todo","In Progress":"badge-inprogress","Done":"badge-done","On Hold":"badge-hold","Cancelled":"badge-cancelled"};
+  return `<span class="badge ${map[s]||"badge-todo"}">${escHtml(s||"To Do")}</span>`;
+}
+function badgeClass(s){ return ""; }
+function escHtml(str){ return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 let toastTimer;
-function showToast(msg, type = "success") {
-  const el = document.getElementById("toast");
-  el.textContent = msg;
-  el.className = `show ${type}`;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { el.className = ""; }, 3000);
+function showToast(msg,type="success"){
+  const el=document.getElementById("toast");
+  el.textContent=msg; el.className=`show ${type}`;
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>{el.className="";},3000);
 }
 
-// Close modal on overlay click
-document.getElementById("overlay").addEventListener("click", e => {
-  if (e.target === document.getElementById("overlay")) closeModal();
+// Close overlays on bg click
+["overlay","reportOverlay"].forEach(id => {
+  document.getElementById(id).addEventListener("click", e => {
+    if (e.target.id===id) { id==="overlay"?closeModal():closeReport(); }
+  });
 });
+
+// Load summary on start
+loadSummary();
 </script>
 </body>
 </html>
